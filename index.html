@@ -636,7 +636,7 @@ body {
 
 /* 桌面端：强制显示 nav-label */
 @media (min-width: 1025px) {
-  .nav-label { display: inline !important; }
+  .sidebar .nav-item .nav-label { display: inline !important; }
 }
 
 /* 中等屏幕：侧边栏收窄为迷你模式，只显示图标 */
@@ -647,9 +647,9 @@ body {
   .sidebar-logo .logo-text,
   .sidebar-logo .logo-sub,
   .nav-section-label,
-  .nav-label,
   .nav-badge,
   .sidebar-footer { display: none; }
+  .nav-item .nav-label { display: none; }
   .nav-item { justify-content: center; padding: 10px 0; position: relative; }
   .nav-item:hover::after {
     content: attr(data-label);
