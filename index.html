@@ -194,13 +194,20 @@ body {
   box-shadow: var(--shadow-sm);
 }
 .topbar-breadcrumb {
-  font-size: 13px;
-  color: var(--text-muted);
+  font-size: 15px;
+  color: #64748b;
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.topbar-breadcrumb .current { color: var(--text); font-weight: 600; }
+.topbar-breadcrumb .current { 
+  color: #1e293b !important; 
+  font-weight: 700;
+  font-size: 16px;
+}
+[data-theme="dark"] .topbar-breadcrumb .current {
+  color: #f1f5f9 !important;
+}
 .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 .theme-btn {
   width: 36px; height: 36px;
