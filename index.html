@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>建筑修缮智慧平台 · 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   CSS VARIABLES — LIGHT & DARK THEME
+═══════════════════════════════════════════ */
+:root {
+  --bg:          #f0f4f8;
+  --bg-card:     #ffffff;
+  --bg-nav:      #0f172a;
+  --bg-sidebar:  #1e293b;
+  --text:        #1e293b;
+  --text-muted:  #64748b;
+  --text-light:  #94a3b8;
+  --border:      #e2e8f0;
+  --teal:        #0d9488;
+  --teal-d:      #0f766e;
+  --teal-l:      rgba(13,148,136,.12);
+  --amber:       #d97706;
+  --amber-l:     rgba(217,119,6,.12);
+  --red:         #dc2626;
+  --red-l:       rgba(220,38,38,.12);
+  --blue:        #2563eb;
+  --blue-l:      rgba(37,99,235,.12);
+  --purple:      #7c3aed;
+  --purple-l:    rgba(124,58,237,.12);
+  --green:       #16a34a;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow:      0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,.12);
+  --radius:      12px;
+  --radius-sm:   8px;
+  --nav-w:       240px;
+  --transition:  .25s cubic-bezier(.16,1,.3,1);
+}
+[data-theme="dark"] {
+  --bg:          #0a0f1a;
+  --bg-card:     #111827;
+  --bg-nav:      #060c18;
+  --bg-sidebar:  #0d1526;
+  --text:        #f1f5f9;
+  --text-muted:  #94a3b8;
+  --text-light:  #64748b;
+  --border:      #1e293b;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.3);
+  --shadow:      0 4px 16px rgba(0,0,0,.4);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,.5);
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: "PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR NAV
+═══════════════════════════════════════════ */
+.sidebar {
+  position: fixed;
+  left: 0; top: 0;
+  width: var(--nav-w);
+  height: 100vh;
+  background: var(--bg-nav);
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  transition: transform var(--transition), background var(--transition);
+  overflow: hidden;
+}
+.sidebar-logo {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.sidebar-logo .logo-icon {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-d));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(13,148,136,.4);
+}
+.sidebar-logo .logo-text { font-size: 13px; font-weight: 700; color: #fff; }
+.sidebar-logo .logo-sub  { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 2px; }
+
+.nav-section { padding: 16px 12px 8px; }
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,.5);
+  text-transform: uppercase;
+  padding: 0 8px;
+  margin-bottom: 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: rgba(255,255,255,.82);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all var(--transition);
+  margin-bottom: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.nav-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--teal), transparent);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.nav-item:hover { color: #fff; background: rgba(255,255,255,.1); }
+.nav-item.active {
+  color: #fff;
+  background: rgba(13,148,136,.25);
+  box-shadow: inset 0 0 0 1px rgba(13,148,136,.45);
+}
+.nav-item.active::before { opacity: .08; }
+.nav-item .nav-icon { font-size: 16px; flex-shrink: 0; position: relative; z-index: 1; }
+.nav-item .nav-label { position: relative; z-index: 1; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--teal);
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+/* ═══════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════ */
+.main {
+  margin-left: var(--nav-w);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══════════════════════════════════════════
+   TOP BAR
+═══════════════════════════════════════════ */
+.topbar {
+  position: sticky;
+  top: 0;
+  height: 60px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 16px;
+  z-index: 100;
+  transition: background var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+.topbar-breadcrumb {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.topbar-breadcrumb .current { color: var(--text); font-weight: 600; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.theme-btn {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: all var(--transition);
+  color: var(--text);
+}
+.theme-btn:hover { background: var(--teal-l); border-color: var(--teal); }
+.date-badge {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════
+   PAGES
+═══════════════════════════════════════════ */
+.page { display: none; padding: 28px; animation: fadeIn .3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══════════════════════════════════════════
+   PAGE HEADER
+═══════════════════════════════════════════ */
+.page-header {
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.page-title { font-size: 22px; font-weight: 800; color: var(--text); }
+.page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.page-badge {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--teal-l);
+  color: var(--teal);
+  border: 1px solid rgba(13,148,136,.2);
+}
+
+/* ═══════════════════════════════════════════
+   HERO BANNER (首页)
+═══════════════════════════════════════════ */
+.hero-banner {
+  background: linear-gradient(135deg, #0f766e 0%, #134e4a 40%, #0a1628 100%);
+  border-radius: 20px;
+  padding: 48px 40px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(13,148,136,.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; left: 30%;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-banner h1 { font-size: 30px; font-weight: 900; color: #fff; margin-bottom: 10px; line-height: 1.3; }
+.hero-banner p { font-size: 14px; color: rgba(255,255,255,.65); max-width: 600px; line-height: 1.7; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.hero-tag {
+  padding: 4px 14px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 20px;
+  font-size: 12px;
+  color: rgba(255,255,255,.8);
+  backdrop-filter: blur(4px);
+}
+.hero-stats {
+  display: flex;
+  gap: 32px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+.hero-stat-value { font-size: 28px; font-weight: 900; color: #fff; }
+.hero-stat-label { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════
+   KPI CARDS
+═══════════════════════════════════════════ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition);
+  cursor: default;
+}
+.kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--kpi-color, var(--teal));
+}
+.kpi-card.amber { --kpi-color: var(--amber); }
+.kpi-card.red   { --kpi-color: var(--red); }
+.kpi-card.blue  { --kpi-color: var(--blue); }
+.kpi-card.purple{ --kpi-color: var(--purple); }
+.kpi-icon-wrap {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--teal-l);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+.kpi-card.amber .kpi-icon-wrap { background: var(--amber-l); }
+.kpi-card.red   .kpi-icon-wrap { background: var(--red-l); }
+.kpi-card.blue  .kpi-icon-wrap { background: var(--blue-l); }
+.kpi-card.purple .kpi-icon-wrap { background: var(--purple-l); }
+.kpi-label  { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 6px; }
+.kpi-value  { font-size: 24px; font-weight: 900; color: var(--kpi-color, var(--teal)); line-height: 1; }
+.kpi-sub    { font-size: 14px; font-weight: 500; }
+.kpi-change {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; font-weight: 600;
+  color: var(--green);
+  margin-top: 6px;
+}
+.kpi-change.down { color: var(--red); }
+.kpi-note { font-size: 10px; color: var(--text-light); margin-top: 4px; }
+
+/* ═══════════════════════════════════════════
+   SECTION TITLE
+═══════════════════════════════════════════ */
+.section { margin-bottom: 36px; }
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 8px;
+}
+.section-title {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::before {
+  content: '';
+  width: 4px; height: 18px;
+  background: linear-gradient(180deg, var(--teal), var(--teal-d));
+  border-radius: 2px;
+}
+.section-note { font-size: 12px; color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════
+   CHART CARDS
+═══════════════════════════════════════════ */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+.chart-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  transition: background var(--transition), box-shadow var(--transition);
+}
+.chart-card:hover { box-shadow: var(--shadow); }
+.chart-card h3 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.chart-card p  { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; }
+.chart-wrap    { position: relative; height: 260px; }
+.chart-wrap.tall { height: 320px; }
+.chart-wrap.short { height: 200px; }
+
+/* ═══════════════════════════════════════════
+   DATA TABLE
+═══════════════════════════════════════════ */
+.table-wrap {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table thead th {
+  background: var(--bg-nav);
+  color: rgba(255,255,255,.8);
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.data-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--teal-l); }
+.data-table td { padding: 12px 16px; color: var(--text); }
+.data-table td:first-child { font-weight: 600; }
+
+/* ═══════════════════════════════════════════
+   TAGS
+═══════════════════════════════════════════ */
+.tag {
+  display: inline-flex; align-items: center;
+  border-radius: 6px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tag-teal   { background: var(--teal-l);   color: var(--teal-d); }
+.tag-amber  { background: var(--amber-l);  color: var(--amber); }
+.tag-red    { background: var(--red-l);    color: var(--red); }
+.tag-blue   { background: var(--blue-l);   color: var(--blue); }
+.tag-purple { background: var(--purple-l); color: var(--purple); }
+.tag-gray   { background: rgba(100,116,139,.1); color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════
+   INSIGHT / ALERT BOXES
+═══════════════════════════════════════════ */
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.insight-box {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  border-left: 4px solid var(--teal);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--teal);
+  transition: all var(--transition);
+}
+.insight-box:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.insight-box.warning { border-left-color: var(--amber); }
+.insight-box.alert   { border-left-color: var(--red); }
+.insight-box.info    { border-left-color: var(--blue); }
+.insight-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 7px; }
+.insight-box p  { font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+
+/* ═══════════════════════════════════════════
+   DRIVER PROGRESS BARS
+═══════════════════════════════════════════ */
+.driver-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+.driver-card:hover { box-shadow: var(--shadow); }
+.driver-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 14px; }
+.driver-bar-row { margin-bottom: 11px; }
+.driver-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--text-muted);
+  margin-bottom: 5px;
+}
+.driver-bar-track {
+  background: var(--border);
+  border-radius: 4px; height: 7px; overflow: hidden;
+}
+.driver-bar-fill {
+  height: 100%; border-radius: 4px;
+  background: var(--teal);
+  transition: width 1.2s cubic-bezier(.16,1,.3,1);
+}
+.driver-bar-fill.amber { background: var(--amber); }
+.driver-bar-fill.blue  { background: var(--blue); }
+.driver-bar-fill.red   { background: var(--red); }
+.driver-score {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.driver-score strong { font-size: 16px; font-weight: 800; }
+
+/* ═══════════════════════════════════════════
+   ACTION CARDS (行动计划)
+═══════════════════════════════════════════ */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.action-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+.action-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.action-card-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.action-num {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-d));
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(13,148,136,.3);
+}
+.action-card-head h4 { font-size: 13px; font-weight: 700; }
+.action-item {
+  font-size: 12px; color: var(--text-muted);
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 8px;
+  line-height: 1.5;
+}
+.action-item:last-child { border-bottom: none; }
+.action-item::before {
+  content: '▶';
+  font-size: 8px;
+  color: var(--teal);
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════
+   SCORE MATRIX
+═══════════════════════════════════════════ */
+.score-stars { color: var(--amber); font-size: 12px; letter-spacing: 1px; }
+
+/* ═══════════════════════════════════════════
+   FORECAST CARDS
+═══════════════════════════════════════════ */
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.forecast-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 18px 16px;
+  border: 1px solid var(--border);
+  text-align: center;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+.forecast-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.forecast-year { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+.forecast-value { font-size: 22px; font-weight: 900; color: var(--teal); margin-bottom: 4px; }
+.forecast-range { font-size: 11px; color: var(--text-light); }
+.forecast-card.highlight {
+  background: linear-gradient(135deg, var(--teal-d), #134e4a);
+  border-color: transparent;
+}
+.forecast-card.highlight .forecast-year { color: rgba(255,255,255,.6); }
+.forecast-card.highlight .forecast-value { color: #fff; font-size: 26px; }
+.forecast-card.highlight .forecast-range { color: rgba(255,255,255,.5); }
+
+/* ═══════════════════════════════════════════
+   COMPETITION CARDS
+═══════════════════════════════════════════ */
+.company-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.company-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition);
+}
+.company-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.company-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.company-revenue { font-size: 20px; font-weight: 900; color: var(--teal); margin-bottom: 4px; }
+.company-type { font-size: 11px; color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════
+   MOBILE TOGGLE
+═══════════════════════════════════════════ */
+.menu-toggle {
+  display: none;
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px; color: var(--text);
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-light); }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+
+/* 中等屏幕：侧边栏收窄为迷你模式，只显示图标 */
+@media (max-width: 1024px) and (min-width: 641px) {
+  :root { --nav-w: 64px; }
+  .sidebar { width: 64px; overflow: visible; }
+  .sidebar-logo { padding: 20px 0; display: flex; flex-direction: column; align-items: center; }
+  .sidebar-logo .logo-text,
+  .sidebar-logo .logo-sub,
+  .nav-section-label,
+  .nav-label,
+  .nav-badge,
+  .sidebar-footer { display: none; }
+  .nav-item { justify-content: center; padding: 10px 0; position: relative; }
+  .nav-item:hover::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 68px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1e293b;
+    color: #fff;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 999;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  }
+  .nav-section { padding: 8px 4px; }
+  .main { margin-left: 64px; }
+  .menu-toggle { display: none; }
+}
+
+/* 小屏：侧边栏完全抽屉式 */
+@media (max-width: 640px) {
+  :root { --nav-w: 0px; }
+  .sidebar { transform: translateX(-240px); width: 240px; }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .menu-toggle { display: flex; }
+  .page { padding: 16px; }
+  .hero-banner { padding: 28px 20px; }
+  .hero-banner h1 { font-size: 20px; }
+  .hero-stats { gap: 16px; }
+  .chart-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════
+   LOADING ANIMATION
+═══════════════════════════════════════════ */
+.bar-animate .driver-bar-fill { width: 0 !important; }
+
+/* UTILITY */
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
+.full-span { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🏗️</div>
+    <div class="logo-text">建筑修缮智慧平台</div>
+    <div class="logo-sub">中国市场深度分析 · 2026</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">核心模块</div>
+    <div class="nav-item active" data-page="overview" data-label="市场总览">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">市场总览</span>
+    </div>
+    <div class="nav-item" data-page="market" data-label="规模分析">
+      <span class="nav-icon">📈</span>
+      <span class="nav-label">规模分析</span>
+    </div>
+    <div class="nav-item" data-page="drivers" data-label="驱动力模型">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-label">驱动力模型</span>
+    </div>
+    <div class="nav-item" data-page="segments" data-label="细分赛道">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">细分赛道</span>
+      <span class="nav-badge">8</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">战略决策</div>
+    <div class="nav-item" data-page="competition" data-label="竞争格局">
+      <span class="nav-icon">⚔️</span>
+      <span class="nav-label">竞争格局</span>
+    </div>
+    <div class="nav-item" data-page="forecast" data-label="市场预测">
+      <span class="nav-icon">🔮</span>
+      <span class="nav-label">市场预测</span>
+    </div>
+    <div class="nav-item" data-page="decision" data-label="决策矩阵">
+      <span class="nav-icon">🗺️</span>
+      <span class="nav-label">决策矩阵</span>
+    </div>
+    <div class="nav-item" data-page="action" data-label="行动计划">
+      <span class="nav-icon">🚀</span>
+      <span class="nav-label">行动计划</span>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div style="font-size:11px;color:rgba(255,255,255,.55)">数据更新：2026年3月</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">置信区间 ±15%</div>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-breadcrumb">
+      <span>建筑修缮智慧平台</span>
+      <span style="color:var(--border)">›</span>
+      <span class="current" id="breadcrumb-current">市场总览</span>
+    </div>
+    <div class="topbar-right">
+      <div class="date-badge">📅 2026年3月</div>
+      <button class="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════
+       PAGE 1: 市场总览 OVERVIEW
+  ════════════════════════════ -->
+  <div class="page active" id="page-overview">
+    <div class="hero-banner">
+      <div style="position:relative;z-index:1">
+        <div class="hero-tags">
+          <span class="hero-tag">📊 数据分析报告体系</span>
+          <span class="hero-tag">存量时代</span>
+          <span class="hero-tag">结构性机遇</span>
+        </div>
+        <h1>中国建筑修缮市场<br>空间深度分析</h1>
+        <p>从"增量时代"到"存量时代"的结构性机遇 — 量化市场空间、驱动力评分、细分赛道对比、竞争格局与投资决策矩阵，覆盖2024-2030年完整预测模型</p>
+        <div class="hero-stats">
+          <div>
+            <div class="hero-stat-value">2.9<span style="font-size:18px">万亿</span></div>
+            <div class="hero-stat-label">广义市场规模 2024</div>
+          </div>
+          <div>
+            <div class="hero-stat-value">12.6<span style="font-size:18px">%</span></div>
+            <div class="hero-stat-label">CAGR 复合增长率</div>
+          </div>
+          <div>
+            <div class="hero-stat-value">8~10<span style="font-size:18px">万亿</span></div>
+            <div class="hero-stat-label">2030年市场预测</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6 KPIs -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">核心业务 KPI 仪表板</div>
+        <div class="section-note">基于2024年最新数据</div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap">🏗️</div>
+          <div class="kpi-label">广义城市更新市场规模</div>
+          <div class="kpi-value">2.9<span class="kpi-sub">万亿</span></div>
+          <div class="kpi-change">▲ CAGR 12.6%</div>
+          <div class="kpi-note">住建部/光大证券口径 · 2024年</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-icon-wrap">🔧</div>
+          <div class="kpi-label">中义修缮市场规模</div>
+          <div class="kpi-value">1.5<span class="kpi-sub">万亿</span></div>
+          <div class="kpi-change" style="color:var(--amber)">▲ CAGR 10%+</div>
+          <div class="kpi-note">中国表面工程协会 · 2026.3</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-icon-wrap">📐</div>
+          <div class="kpi-label">存量建筑亟需改造面积</div>
+          <div class="kpi-value">170<span class="kpi-sub">亿㎡</span></div>
+          <div class="kpi-change" style="color:var(--blue)">2000年前建造住宅</div>
+          <div class="kpi-note">占城镇住宅总量约 57%</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-icon-wrap">📉</div>
+          <div class="kpi-label">新建房屋开工面积同比</div>
+          <div class="kpi-value">-23<span class="kpi-sub">%</span></div>
+          <div class="kpi-change down">▼ 连续多年负增长</div>
+          <div class="kpi-note">国家统计局 · 2024年</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap">🎯</div>
+          <div class="kpi-label">行业集中度 CR5</div>
+          <div class="kpi-value">~15<span class="kpi-sub">%</span></div>
+          <div class="kpi-change">整合机遇极大</div>
+          <div class="kpi-note">高度分散 · 战国争雄格局</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-icon-wrap">🚀</div>
+          <div class="kpi-label">2030年市场规模预测</div>
+          <div class="kpi-value">8~10<span class="kpi-sub">万亿</span></div>
+          <div class="kpi-change" style="color:var(--amber)">▲ 广义口径目标</div>
+          <div class="kpi-note">行业机构综合预测</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overview charts -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">市场增长与全球对比</div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>建筑修缮产值历史增长（亿元）</h3>
+          <p>国家统计局口径 · 2010—2024E</p>
+          <div class="chart-wrap"><canvas id="c-history"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>修缮占建筑业比重：全球对比</h3>
+          <p>中国仅10%，欧美成熟市场35~55% — 差距即空间</p>
+          <div class="chart-wrap"><canvas id="c-global"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insight boxes -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">分析洞察</div></div>
+      <div class="insight-grid">
+        <div class="insight-box">
+          <h4>🔍 结构性转型：增量→存量</h4>
+          <p>新建开工面积连续三年负增长，标志中国建筑业正式步入存量运营时代。建筑修缮将从"附属业务"升级为行业主流，迎来历史性战略窗口期。</p>
+        </div>
+        <div class="insight-box warning">
+          <h4>⚠️ 大修高峰即将到来</h4>
+          <p>2025-2035年，1991-2000年间建设的80亿㎡存量建筑将集中进入大修期。每年释放需求可能超过万亿元，是建筑业历史上规模最大的一次集中需求爆发。</p>
+        </div>
+        <div class="insight-box info">
+          <h4>📊 行业分散是最大机遇</h4>
+          <p>CR5仅15%的高度分散市场，意味着头部效应尚未形成。先发制人建立"品牌+标准+施工队伍"三位一体模式，有望以极低市场占有率撬动巨大绝对规模。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════
+       PAGE 2: 规模分析
+  ════════════════════════════ -->
+  <div class="page" id="page-market">
+    <div class="page-header">
+      <div>
+        <div class="page-title">市场规模分析</div>
+        <div class="page-subtitle">历史增长轨迹、口径对比与存量建筑年龄结构</div>
+      </div>
+      <span class="page-badge">数据截至2024年</span>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">2024年各统计口径对比</div></div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>市场规模口径对比（亿元）</h3>
+          <p>不同统计口径下的市场规模 — 选择口径影响战略判断</p>
+          <div class="chart-wrap"><canvas id="c-caliber"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>城镇建筑年龄结构与改造需求</h3>
+          <p>2025-2035集中大修高峰，每年释放需求可能超万亿</p>
+          <div class="chart-wrap"><canvas id="c-age"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">统计口径详细说明</div></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>统计口径</th>
+              <th>2024年估算规模</th>
+              <th>数据来源</th>
+              <th>可信度</th>
+              <th>分析师点评</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>建筑防水修缮（最窄）</td>
+              <td>1,500~2,000亿元</td>
+              <td>防水行业协会</td>
+              <td><span class="tag tag-teal">高</span></td>
+              <td>最具代表性的专项数据，可追溯</td>
+            </tr>
+            <tr>
+              <td>房屋修缮（含装饰维修）</td>
+              <td>3,500~5,000亿元</td>
+              <td>多家研究机构</td>
+              <td><span class="tag tag-amber">中</span></td>
+              <td>口径定义不统一，跨机构差异大</td>
+            </tr>
+            <tr>
+              <td>建筑修缮行业（含涂装修缮）</td>
+              <td><strong>约1.5万亿元</strong></td>
+              <td>中国表面工程协会</td>
+              <td><span class="tag tag-teal">高</span></td>
+              <td>2026年3月最新披露，官方协会背书</td>
+            </tr>
+            <tr>
+              <td>广义城市更新</td>
+              <td><strong>约2.9万亿元</strong></td>
+              <td>住建部/光大证券</td>
+              <td><span class="tag tag-teal">高</span></td>
+              <td>含棚改、城中村等政策性项目</td>
+            </tr>
+            <tr>
+              <td>超广义口径（东方雨虹）</td>
+              <td>3.54万亿元</td>
+              <td>东方雨虹年报</td>
+              <td><span class="tag tag-amber">中</span></td>
+              <td>企业自身视角，有扩张口径倾向</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="insight-grid">
+      <div class="insight-box">
+        <h4>🔍 口径选择即战略选择</h4>
+        <p>选择1.5万亿中义口径意味着锁定专业修缮施工赛道；选择2.9万亿广义口径则涵盖城市运营、基础设施，竞争格局截然不同。业务决策时需先锁定口径，再评估自身能力半径。</p>
+      </div>
+      <div class="insight-box warning">
+        <h4>⚠️ 数据质量警告</h4>
+        <p>部分数据来自行业协会或上市公司年报，存在对外宣传的过度乐观倾向。建议将产值型数据与用电量、施工人员数量等替代指标交叉验证，置信区间至少保留±15%误差。</p>
+      </div>
+      <div class="insight-box info">
+        <h4>📊 建立企业自用数据追踪体系</h4>
+        <p>建议建立三层追踪：①国家统计局建筑业年报（官方基准）；②头部企业修缮业务收入追踪（东方雨虹、科顺年报）；③政府老旧小区开工项目数（住建部公告）。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════
+       PAGE 3: 驱动力模型
+  ════════════════════════════ -->
+  <div class="page" id="page-drivers">
+    <div class="page-header">
+      <div>
+        <div class="page-title">驱动力量化评分模型</div>
+        <div class="page-subtitle">三大结构性推力的强度评分与持续性评估</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">三大驱动力评分</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+        <!-- D1 -->
+        <div class="driver-card">
+          <h4>🏚️ 驱动力1：存量建筑自然老化（刚性需求）</h4>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>需求规模</span><span>95/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill" style="width:95%"></div></div>
+          </div>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>需求刚性</span><span>90/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill" style="width:90%"></div></div>
+          </div>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>释放节奏可预测性</span><span>85/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill" style="width:85%"></div></div>
+          </div>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>市场爆发紧迫性</span><span>80/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill" style="width:80%"></div></div>
+          </div>
+          <div class="driver-score">综合得分：<strong style="color:var(--teal-d)">88/100（极强）</strong><br><span style="font-size:11px">607亿㎡存量建筑，平均楼龄24.6年，2025-2035集中大修高峰</span></div>
+        </div>
+        <!-- D2 -->
+        <div class="driver-card">
+          <h4>🏛️ 驱动力2：政策驱动（国家战略级推进）</h4>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>政策力度</span><span>95/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill amber" style="width:95%"></div></div>
+          </div>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>财政支持强度</span><span>88/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill amber" style="width:88%"></div></div>
+          </div>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>政策持续性</span><span>82/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill amber" style="width:82%"></div></div>
+          </div>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>执行落地效率</span><span>72/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill amber" style="width:72%"></div></div>
+          </div>
+          <div class="driver-score">综合得分：<strong style="color:var(--amber)">84/100（强）</strong><br><span style="font-size:11px">十四五带动3.6万亿投资，节能改造8亿㎡，超额完成年度目标</span></div>
+        </div>
+        <!-- D3 -->
+        <div class="driver-card">
+          <h4>💎 驱动力3：居民消费升级（需求质量革命）</h4>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>需求增长潜力</span><span>80/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill blue" style="width:80%"></div></div>
+          </div>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>客单价提升空间</span><span>75/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill blue" style="width:75%"></div></div>
+          </div>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>支付能力</span><span>68/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill blue" style="width:68%"></div></div>
+          </div>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>决策主动性</span><span>65/100</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill blue" style="width:65%"></div></div>
+          </div>
+          <div class="driver-score">综合得分：<strong style="color:var(--blue)">72/100（中强）</strong><br><span style="font-size:11px">年旧房翻新2,000~3,000万套，二手房成交占比超45%，户均支出3~5万元</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">驱动力综合对比</div></div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>驱动力综合评分雷达图</h3>
+          <p>六维度评估三大驱动力的结构性差异</p>
+          <div class="chart-wrap"><canvas id="c-radar"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>政策驱动事件时间轴强度</h3>
+          <p>主要政策出台节点与市场响应（2020-2026）</p>
+          <div class="chart-wrap"><canvas id="c-policy"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════
+       PAGE 4: 细分赛道
+  ════════════════════════════ -->
+  <div class="page" id="page-segments">
+    <div class="page-header">
+      <div>
+        <div class="page-title">细分赛道结构分析</div>
+        <div class="page-subtitle">八大细分赛道的规模、增速、市场特征与战略价值综合评估</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>细分赛道规模对比（亿元，2024年）</h3>
+          <p>住宅修缮最大，节能改造增速最快</p>
+          <div class="chart-wrap"><canvas id="c-segments"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>细分赛道增速对比（CAGR %）</h3>
+          <p>增速 × 规模双维度识别战略高地</p>
+          <div class="chart-wrap"><canvas id="c-cagr"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">细分赛道综合评估</div></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>细分赛道</th><th>2024规模</th><th>CAGR</th>
+              <th>客户类型</th><th>政策依赖度</th><th>技术壁垒</th><th>战略评级</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>建筑节能改造</td><td>约500亿+</td>
+              <td><strong style="color:var(--teal-d)">20~25%</strong></td>
+              <td>B/G端</td>
+              <td><span class="tag tag-teal">极高</span></td>
+              <td><span class="tag tag-amber">中高</span></td>
+              <td><span class="tag tag-teal">★★★★★ 立即进入</span></td>
+            </tr>
+            <tr>
+              <td>老旧小区基础设施改造</td><td>约3,000亿/年</td>
+              <td><strong style="color:var(--teal-d)">12~15%</strong></td>
+              <td>G端主导</td>
+              <td><span class="tag tag-teal">极高</span></td>
+              <td><span class="tag tag-red">低</span></td>
+              <td><span class="tag tag-teal">★★★★☆ 立即进入</span></td>
+            </tr>
+            <tr>
+              <td>专业防水修缮</td><td>1,500~2,000亿</td>
+              <td><strong style="color:var(--teal-d)">12~15%</strong></td>
+              <td>C/B/G端</td>
+              <td><span class="tag tag-amber">中</span></td>
+              <td><span class="tag tag-teal">高</span></td>
+              <td><span class="tag tag-amber">★★★★☆ 重点布局</span></td>
+            </tr>
+            <tr>
+              <td>住宅修缮与翻新</td><td>约6,000亿</td>
+              <td>8~10%</td>
+              <td>C/B端</td>
+              <td><span class="tag tag-red">低</span></td>
+              <td><span class="tag tag-red">低</span></td>
+              <td><span class="tag tag-amber">★★★☆☆ 择机进入</span></td>
+            </tr>
+            <tr>
+              <td>公共建筑改造</td><td>约2,800亿</td>
+              <td>10~12%</td>
+              <td>B/G端</td>
+              <td><span class="tag tag-teal">高</span></td>
+              <td><span class="tag tag-amber">中</span></td>
+              <td><span class="tag tag-amber">★★★☆☆ 择机进入</span></td>
+            </tr>
+            <tr>
+              <td>建筑外墙涂装修缮</td><td>约800亿</td>
+              <td>10~12%</td>
+              <td>B/G端</td>
+              <td><span class="tag tag-amber">中</span></td>
+              <td><span class="tag tag-red">低</span></td>
+              <td><span class="tag tag-gray">★★★☆☆ 选择性参与</span></td>
+            </tr>
+            <tr>
+              <td>历史建筑保护修缮</td><td>约200亿</td>
+              <td>10~15%</td>
+              <td>G端</td>
+              <td><span class="tag tag-teal">极高</span></td>
+              <td><span class="tag tag-teal">极高</span></td>
+              <td><span class="tag tag-gray">★★★☆☆ 能力储备</span></td>
+            </tr>
+            <tr>
+              <td>抗震加固与结构修缮</td><td>300~500亿</td>
+              <td>8~12%</td>
+              <td>B/G端</td>
+              <td><span class="tag tag-amber">中高</span></td>
+              <td><span class="tag tag-teal">极高</span></td>
+              <td><span class="tag tag-gray">★★★☆☆ 观望</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section mt-6">
+      <div class="section-head"><div class="section-title">地区市场份额分布</div></div>
+      <div class="chart-card" style="max-width:600px">
+        <h3>地区市场份额分布</h3>
+        <p>长三角和珠三角合计占全国市场40~50%，西部增速最快</p>
+        <div class="chart-wrap short"><canvas id="c-region"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════
+       PAGE 5: 竞争格局
+  ════════════════════════════ -->
+  <div class="page" id="page-competition">
+    <div class="page-header">
+      <div>
+        <div class="page-title">竞争格局分析</div>
+        <div class="page-subtitle">CR5仅15% — 高度分散市场下的头部整合路径与关键竞争要素评估</div>
+      </div>
+    </div>
+
+    <!-- 头部企业 -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">头部企业修缮业务规模（2023年）</div></div>
+      <div class="company-grid">
+        <div class="company-card">
+          <div class="company-name">中建系旧改项目</div>
+          <div class="company-revenue">80<span style="font-size:14px">亿元</span></div>
+          <div class="company-type"><span class="tag tag-blue">央企/国企总包</span></div>
+        </div>
+        <div class="company-card">
+          <div class="company-name">东方雨虹·修缮业务</div>
+          <div class="company-revenue">50<span style="font-size:14px">亿元</span></div>
+          <div class="company-type"><span class="tag tag-teal">防水修缮专业龙头</span></div>
+        </div>
+        <div class="company-card">
+          <div class="company-name">三棵树·修缮板块</div>
+          <div class="company-revenue">20<span style="font-size:14px">亿元</span></div>
+          <div class="company-type"><span class="tag tag-amber">材料商施工延伸</span></div>
+        </div>
+        <div class="company-card">
+          <div class="company-name">科顺股份·修缮业务</div>
+          <div class="company-revenue">18<span style="font-size:14px">亿元</span></div>
+          <div class="company-type"><span class="tag tag-teal">防水修缮专业龙头</span></div>
+        </div>
+        <div class="company-card">
+          <div class="company-name">北新建材·修缮收入</div>
+          <div class="company-revenue">12<span style="font-size:14px">亿元</span></div>
+          <div class="company-type"><span class="tag tag-amber">材料商施工延伸</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>市场参与者类型结构</h3>
+          <p>四类玩家的市场份额分布估算</p>
+          <div class="chart-wrap"><canvas id="c-players"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>头部企业修缮业务规模（亿元）</h3>
+          <p>东方雨虹领跑，行业龙头规模仍相对有限</p>
+          <div class="chart-wrap"><canvas id="c-leaders"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 五力分析 -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">波特五力竞争分析</div></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>竞争力量</th><th>强度评级</th><th>核心描述</th><th>对头部企业的影响</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>行业内竞争</td><td><span class="tag tag-amber">中高</span></td><td>CR5仅15%，高度分散，价格竞争激烈</td><td>市场份额易得，但价格压力大</td></tr>
+            <tr><td>新进入者威胁</td><td><span class="tag tag-red">高</span></td><td>进入壁垒较低，材料商、央企均在渗透</td><td>需快速建立品牌和施工队伍护城河</td></tr>
+            <tr><td>替代品威胁</td><td><span class="tag tag-teal">低</span></td><td>建筑修缮需求刚性，无本质替代品</td><td>长期需求稳定，不必担忧替代</td></tr>
+            <tr><td>供应商议价能力</td><td><span class="tag tag-amber">中</span></td><td>材料供应商多，但专业技工稀缺</td><td>材料一体化能降低成本，技工是瓶颈</td></tr>
+            <tr><td>买方议价能力</td><td><span class="tag tag-amber">中高</span></td><td>政府采购需招投标，C端信息不对称</td><td>品牌化建设是抗议价能力的核心手段</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="insight-grid">
+      <div class="insight-box">
+        <h4>🔑 关键竞争要素排序</h4>
+        <p><strong>第一：品牌信任</strong>（业主最看重声誉和案例口碑）<br>
+        <strong>第二：施工队伍质量</strong>（技工稀缺是行业真正壁垒）<br>
+        <strong>第三：材料+施工一体化</strong>（毛利率提升的关键路径）<br>
+        <strong>第四：数字化能力</strong>（勘察诊断+施工管理的效率差异化）</p>
+      </div>
+      <div class="insight-box warning">
+        <h4>⚠️ 行业三大痛点（亦是进入机会）</h4>
+        <p><strong>1. 标准化缺失：</strong>施工标准不统一，质量良莠不齐<br>
+        <strong>2. 诊断技术薄弱：</strong>建筑病害精准诊断能力稀缺<br>
+        <strong>3. 资金模式不清晰：</strong>住房维修基金制度待完善</p>
+      </div>
+      <div class="insight-box info">
+        <h4>📈 整合路径建议</h4>
+        <p>头部企业应通过"品牌+标准+施工队伍"三位一体模式加速整合，参考家装行业"互联网改造"路径，建立数字化获客、标准化施工、品牌化服务的完整闭环。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════
+       PAGE 6: 市场预测
+  ════════════════════════════ -->
+  <div class="page" id="page-forecast">
+    <div class="page-header">
+      <div>
+        <div class="page-title">市场规模预测模型</div>
+        <div class="page-subtitle">三情景模型（悲观/基准/乐观）× 广义/狭义双口径 — 为战略决策提供量化边界</div>
+      </div>
+    </div>
+
+    <!-- Forecast cards -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">关键年份预测（广义口径，基准情景）</div></div>
+      <div class="forecast-grid">
+        <div class="forecast-card">
+          <div class="forecast-year">2024年（实际）</div>
+          <div class="forecast-value">2.9<span style="font-size:14px">万亿</span></div>
+          <div class="forecast-range">狭义：1.5万亿</div>
+        </div>
+        <div class="forecast-card">
+          <div class="forecast-year">2025年</div>
+          <div class="forecast-value">3.35<span style="font-size:14px">万亿</span></div>
+          <div class="forecast-range">区间：3.2~3.5万亿</div>
+        </div>
+        <div class="forecast-card">
+          <div class="forecast-year">2027年</div>
+          <div class="forecast-value">4.75<span style="font-size:14px">万亿</span></div>
+          <div class="forecast-range">区间：4.5~5万亿</div>
+        </div>
+        <div class="forecast-card highlight">
+          <div class="forecast-year">2030年目标</div>
+          <div class="forecast-value">8~10<span style="font-size:16px">万亿</span></div>
+          <div class="forecast-range">乐观：10万亿+ / 悲观：6万亿</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="chart-card full-span">
+        <h3>市场规模三情景预测（万亿元，广义口径）</h3>
+        <p>基准假设：政策延续性高 + 存量建筑正常老化节奏。乐观场景叠加"十五五"政策加码；悲观场景考虑经济下行和政策退坡</p>
+        <div class="chart-wrap tall"><canvas id="c-forecast"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 预测数据表 -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">三情景预测数据详表</div></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>年份</th><th>广义（基准）</th><th>广义（乐观）</th><th>广义（悲观）</th><th>狭义修缮（基准）</th><th>关键驱动事件</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>2024年（实际）</td><td>2.9万亿</td><td>—</td><td>—</td><td>1.5万亿</td><td>老旧小区改造超额完成（2.71万个）</td></tr>
+            <tr><td>2025年</td><td>3.2~3.5万亿</td><td>3.8万亿</td><td>3.0万亿</td><td>约1.7万亿</td><td>节能改造扩面，高层修缮突破7,000亿</td></tr>
+            <tr><td>2027年</td><td>4.5~5万亿</td><td>5.5万亿</td><td>4.0万亿</td><td>约2.2万亿</td><td>建筑进入第二轮大修期</td></tr>
+            <tr><td>2030年</td><td><strong>8~10万亿</strong></td><td>10万亿+</td><td>6万亿</td><td>约4万亿</td><td>存量改造成为建筑业主流，双碳目标节点</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="insight-grid">
+      <div class="insight-box alert">
+        <h4>🎯 预测模型假设与风险</h4>
+        <p>基准预测依赖：①政策延续性；②存量建筑正常老化节奏；③经济增速维持6%以上。主要下行风险：政策退坡（-20%）、经济下行（-15%）、地产持续衰退（-10%）。</p>
+      </div>
+      <div class="insight-box">
+        <h4>📊 统计置信度说明</h4>
+        <p>2025年预测置信度85%；2027年约72%；2030年约55%。建议每季度更新一次政策跟踪和头部企业订单数据，动态校准预测模型。节能改造CAGR 20~25%为最确定性增速，置信度90%+。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════
+       PAGE 7: 决策矩阵
+  ════════════════════════════ -->
+  <div class="page" id="page-decision">
+    <div class="page-header">
+      <div>
+        <div class="page-title">战略决策矩阵</div>
+        <div class="page-subtitle">增速 × 市场规模气泡图 + 投资优先级矩阵 — 数据驱动的战略进入决策</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="chart-card">
+        <h3>细分赛道战略定位图（规模 × 增速 × 准入难度）</h3>
+        <p>气泡大小代表市场规模；横轴为增速（CAGR %）；纵轴为准入难度（1-5）</p>
+        <div class="chart-wrap tall"><canvas id="c-bubble"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">投资优先级矩阵</div></div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>赛道</th><th>增速</th><th>竞争强度</th><th>准入难度</th><th>政策红利</th><th>综合得分</th><th>建议行动</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>建筑节能改造</td>
+              <td><span class="score-stars">★★★★★</span></td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><span class="score-stars">★★★★☆</span></td>
+              <td><span class="score-stars">★★★★★</span></td>
+              <td><strong style="color:var(--teal-d)">92/100</strong></td>
+              <td><span class="tag tag-teal">立即进入</span></td>
+            </tr>
+            <tr>
+              <td>老旧小区改造</td>
+              <td><span class="score-stars">★★★★☆</span></td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><span class="score-stars">★★★★★</span></td>
+              <td><strong style="color:var(--teal-d)">85/100</strong></td>
+              <td><span class="tag tag-teal">立即进入</span></td>
+            </tr>
+            <tr>
+              <td>专业防水修缮</td>
+              <td><span class="score-stars">★★★★☆</span></td>
+              <td><span class="score-stars">★★★★☆</span></td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><strong style="color:var(--amber)">78/100</strong></td>
+              <td><span class="tag tag-amber">重点布局</span></td>
+            </tr>
+            <tr>
+              <td>公共建筑改造</td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><span class="score-stars">★★★★☆</span></td>
+              <td><strong style="color:var(--amber)">72/100</strong></td>
+              <td><span class="tag tag-amber">择机进入</span></td>
+            </tr>
+            <tr>
+              <td>外墙涂装修缮</td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><span class="score-stars">★★★★★</span></td>
+              <td><span class="score-stars">★★☆☆☆</span></td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td>65/100</td>
+              <td><span class="tag tag-blue">选择性参与</span></td>
+            </tr>
+            <tr>
+              <td>历史建筑保护</td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><span class="score-stars">★★☆☆☆</span></td>
+              <td><span class="score-stars">★★★★★</span></td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td>63/100</td>
+              <td><span class="tag tag-gray">能力储备</span></td>
+            </tr>
+            <tr>
+              <td>结构加固/抗震</td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td><span class="score-stars">★★☆☆☆</span></td>
+              <td><span class="score-stars">★★★★★</span></td>
+              <td><span class="score-stars">★★★☆☆</span></td>
+              <td>60/100</td>
+              <td><span class="tag tag-gray">观望</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════
+       PAGE 8: 行动计划
+  ════════════════════════════ -->
+  <div class="page" id="page-action">
+    <div class="page-header">
+      <div>
+        <div class="page-title">战略行动计划</div>
+        <div class="page-subtitle">三阶段行动路径 + 核心KPI监控体系</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="action-grid">
+        <div class="action-card">
+          <div class="action-card-head">
+            <div class="action-num">1</div>
+            <h4>第一阶段（0-12个月）即时行动</h4>
+          </div>
+          <div class="action-item">锁定建筑节能改造赛道，获取双碳政策项目资质，建立绿色建材供应链</div>
+          <div class="action-item">在长三角/京津冀老旧小区改造中建立标杆项目，形成可复制的品牌案例</div>
+          <div class="action-item">构建专业防水修缮施工队伍，建立培训体系，扩充核心技工资产</div>
+          <div class="action-item">建立市场数据追踪仪表板，持续更新三层数据源（统计局+头部企业+政府公告）</div>
+        </div>
+        <div class="action-card">
+          <div class="action-card-head">
+            <div class="action-num">2</div>
+            <h4>第二阶段（12-36个月）生态建设</h4>
+          </div>
+          <div class="action-item">推进"材料+施工"一体化模式，提升综合毛利率至35%+</div>
+          <div class="action-item">开发建筑病害数字化诊断系统，以技术差异化建立竞争壁垒</div>
+          <div class="action-item">向华东、华北核心城市集中扩张，三年内建立区域品牌领导地位</div>
+          <div class="action-item">形成行业修缮标准，参与协会标准制定以提升行业话语权</div>
+        </div>
+        <div class="action-card">
+          <div class="action-card-head">
+            <div class="action-num">3</div>
+            <h4>第三阶段（3-5年）规模整合</h4>
+          </div>
+          <div class="action-item">收购优质区域修缮公司，加速全国化布局，CR5份额目标提升至3%+</div>
+          <div class="action-item">切入"智能诊断+精准修缮"技术体系，布局AI赋能的建筑检测服务</div>
+          <div class="action-item">与物业公司建立长期战略合作，构建建筑全生命周期管理服务能力</div>
+          <div class="action-item">推进资本市场布局，以品牌+标准+技术的三元素争取估值溢价</div>
+        </div>
+        <div class="action-card">
+          <div class="action-card-head">
+            <div class="action-num">4</div>
+            <h4>核心KPI监控体系</h4>
+          </div>
+          <div class="action-item">月度：老旧小区改造开工项目数（住建部公告）、头部企业修缮收入披露</div>
+          <div class="action-item">季度：国家统计局建筑业修理产值、节能改造补贴政策更新追踪</div>
+          <div class="action-item">年度：细分赛道CR5变化、自身市场份额、品牌价值和施工队伍规模</div>
+          <div class="action-item">预警指标：政策文件关键词监控（"十五五"、补贴退坡、财政收缩）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 报告体系说明 -->
+    <div class="section">
+      <div class="section-head"><div class="section-title">数据分析报告体系四层框架</div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+        <div class="driver-card">
+          <h4 style="color:var(--teal-d)">层级1：描述性分析</h4>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">是什么（What Happened）</p>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>完成度</span><span>90%</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill" style="width:90%"></div></div>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted)">市场规模数据、历史增速、政策清单。已充分完成，数据来源注明规范。</p>
+        </div>
+        <div class="driver-card">
+          <h4 style="color:var(--amber)">层级2：诊断性分析</h4>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">为什么（Why It Happened）</p>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>完成度</span><span>70%</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill amber" style="width:70%"></div></div>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted)">驱动力评分模型、五力分析、细分赛道对比。已新增量化评分框架。</p>
+        </div>
+        <div class="driver-card">
+          <h4 style="color:var(--blue)">层级3：预测性分析</h4>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">将发生什么（What Will Happen）</p>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>完成度</span><span>65%</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill blue" style="width:65%"></div></div>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted)">三情景预测模型（悲观/基准/乐观）+ 置信度说明。后续需补充计量模型支撑。</p>
+        </div>
+        <div class="driver-card">
+          <h4 style="color:var(--red)">层级4：规范性分析</h4>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px">应该怎么做（What To Do）</p>
+          <div class="driver-bar-row">
+            <div class="driver-bar-label"><span>完成度</span><span>80%</span></div>
+            <div class="driver-bar-track"><div class="driver-bar-fill red" style="width:80%"></div></div>
+          </div>
+          <p style="font-size:12px;color:var(--text-muted)">投资优先级矩阵、三阶段行动计划、KPI监控体系。已系统覆盖。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script>
+/* ─── NAVIGATION ─── */
+const navItems = document.querySelectorAll('.nav-item');
+const pages    = document.querySelectorAll('.page');
+const breadcrumb = document.getElementById('breadcrumb-current');
+const pageNames  = {
+  overview:'市场总览', market:'规模分析', drivers:'驱动力模型',
+  segments:'细分赛道', competition:'竞争格局', forecast:'市场预测',
+  decision:'决策矩阵', action:'行动计划'
+};
+
+function switchPage(pageId) {
+  pages.forEach(p => p.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + pageId)?.classList.add('active');
+  document.querySelector(`[data-page="${pageId}"]`)?.classList.add('active');
+  breadcrumb.textContent = pageNames[pageId] || pageId;
+  // lazy-init charts for this page
+  initChartsFor(pageId);
+  // close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => switchPage(item.dataset.page));
+});
+
+/* ─── THEME ─── */
+let dark = false;
+function toggleTheme() {
+  dark = !dark;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.querySelector('.theme-btn').textContent = dark ? '☀️' : '🌙';
+  // re-render charts with new colors
+  Object.values(chartInstances).forEach(c => { if(c) { c.destroy(); } });
+  Object.keys(chartInstances).forEach(k => chartInstances[k] = null);
+  initialized.clear();
+  initChartsFor(currentPage());
+}
+
+function currentPage() {
+  const active = document.querySelector('.page.active');
+  return active ? active.id.replace('page-', '') : 'overview';
+}
+
+/* ─── MOBILE SIDEBAR ─── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ─── CHART HELPERS ─── */
+const chartInstances = {};
+const initialized = new Set();
+
+function getCSS(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+const C = {
+  get teal()   { return '#0d9488'; },
+  get tealD()  { return '#0f766e'; },
+  get amber()  { return '#d97706'; },
+  get red()    { return '#dc2626'; },
+  get blue()   { return '#2563eb'; },
+  get gray()   { return '#94a3b8'; },
+  get purple() { return '#7c3aed'; },
+  alpha(hex, a) {
+    const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+};
+
+Chart.defaults.font.family = "'PingFang SC','Microsoft YaHei',sans-serif";
+Chart.defaults.font.size   = 12;
+function getTextColor() { return dark ? '#94a3b8' : '#475569'; }
+function getGridColor() { return dark ? 'rgba(255,255,255,.06)' : '#f1f5f9'; }
+
+function baseOpts(extra = {}) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: getTextColor() } },
+      y: { grid: { color: getGridColor() }, ticks: { color: getTextColor() } }
+    },
+    ...extra
+  };
+}
+
+function mk(id, config) {
+  if(chartInstances[id]) chartInstances[id].destroy();
+  const el = document.getElementById(id);
+  if(!el) return;
+  Chart.defaults.color = getTextColor();
+  chartInstances[id] = new Chart(el, config);
+}
+
+/* ─── CHART FACTORY ─── */
+function initChartsFor(pageId) {
+  if(initialized.has(pageId)) return;
+  initialized.add(pageId);
+
+  if(pageId === 'overview' || pageId === 'market') {
+    // History line chart
+    mk('c-history', {
+      type: 'line',
+      data: {
+        labels: ['2010','2012','2014','2015','2017','2019','2021','2022','2024E'],
+        datasets: [{
+          label: '建筑修缮产值（亿元）',
+          data: [1200,1680,2200,2500,3800,5600,6200,6695,8500],
+          borderColor: C.teal,
+          backgroundColor: C.alpha(C.teal,.1),
+          fill: true, tension: 0.4,
+          pointBackgroundColor: C.tealD, pointRadius: 5
+        }]
+      },
+      options: baseOpts({ plugins:{ legend:{display:false} } })
+    });
+
+    // Global comparison
+    mk('c-global', {
+      type: 'bar',
+      data: {
+        labels: ['中国（当前）','美国','德国','英国','中国2030E'],
+        datasets: [{
+          label: '修缮占比(%)',
+          data: [10,40,48,53,30],
+          backgroundColor: [C.alpha(C.red,.35), C.alpha(C.blue,.35), C.alpha(C.teal,.35), C.alpha(C.teal,.5), C.alpha(C.amber,.5)],
+          borderColor: [C.red, C.blue, C.teal, C.tealD, C.amber],
+          borderWidth: 2, borderRadius: 6
+        }]
+      },
+      options: {
+        ...baseOpts(), indexAxis:'y',
+        scales:{ x:{max:60,grid:{color:getGridColor()},ticks:{color:getTextColor()}}, y:{grid:{display:false},ticks:{color:getTextColor()}} }
+      }
+    });
+  }
+
+  if(pageId === 'market') {
+    // Caliber bar
+    mk('c-caliber', {
+      type: 'bar',
+      data: {
+        labels: ['防水修缮（最窄）','房屋修缮','中义修缮（协会）','广义城市更新'],
+        datasets: [{
+          data: [1750,4250,15000,29000],
+          backgroundColor: [C.alpha(C.blue,.25),C.alpha(C.amber,.25),C.alpha(C.teal,.25),C.alpha(C.red,.2)],
+          borderColor: [C.blue,C.amber,C.teal,C.red],
+          borderWidth:2, borderRadius:6
+        }]
+      },
+      options: baseOpts({ plugins:{legend:{display:false}} })
+    });
+    // Age structure
+    mk('c-age', {
+      type: 'bar',
+      data: {
+        labels: ['1980前','1981-90','1991-00','2001-10','2011-20','2021后'],
+        datasets: [
+          {
+            label: '存量面积（亿㎡）',
+            data: [30,60,80,140,200,97],
+            backgroundColor: [C.alpha(C.red,.55),C.alpha(C.red,.4),C.alpha(C.amber,.4),C.alpha(C.teal,.3),C.alpha(C.teal,.2),C.alpha(C.blue,.2)],
+            borderColor: [C.red,C.red,C.amber,C.teal,C.teal,C.blue],
+            borderWidth:2, borderRadius:6
+          },
+          {
+            label: '改造紧迫性',
+            data: [95,85,70,45,20,5],
+            type:'line', yAxisID:'y2',
+            borderColor: C.red, backgroundColor:'transparent',
+            borderDash:[5,5], pointRadius:4, tension:0.4
+          }
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11},color:getTextColor()}}},
+        scales:{
+          y:{grid:{color:getGridColor()},ticks:{color:getTextColor()},title:{display:true,text:'面积（亿㎡）',color:getTextColor()}},
+          y2:{position:'right',min:0,max:100,grid:{display:false},ticks:{color:getTextColor()},title:{display:true,text:'紧迫性指数',color:getTextColor()}},
+          x:{grid:{display:false},ticks:{color:getTextColor(),font:{size:10}}}
+        }
+      }
+    });
+  }
+
+  if(pageId === 'drivers') {
+    // Radar
+    mk('c-radar', {
+      type: 'radar',
+      data: {
+        labels: ['需求规模','需求刚性','可预测性','政策支持','支付能力','市场紧迫性'],
+        datasets: [
+          { label:'存量老化（刚性需求）', data:[95,90,85,60,70,80], borderColor:C.teal, backgroundColor:C.alpha(C.teal,.15), pointBackgroundColor:C.tealD },
+          { label:'政策驱动', data:[80,75,70,95,85,88], borderColor:C.amber, backgroundColor:C.alpha(C.amber,.15), pointBackgroundColor:C.amber },
+          { label:'消费升级', data:[65,60,55,40,68,65], borderColor:C.blue, backgroundColor:C.alpha(C.blue,.15), pointBackgroundColor:C.blue }
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10},color:getTextColor()}}},
+        scales:{r:{min:0,max:100,ticks:{stepSize:20,font:{size:9},color:getTextColor()},grid:{color:getGridColor()},pointLabels:{color:getTextColor()}}}
+      }
+    });
+    // Policy bar
+    mk('c-policy', {
+      type:'bar',
+      data:{
+        labels:['2020','2021','2022','2023','2024','2025','2026E'],
+        datasets:[{
+          label:'政策力度评分',
+          data:[75,90,80,85,85,92,88],
+          backgroundColor:[C.alpha(C.amber,.4),C.alpha(C.teal,.5),C.alpha(C.amber,.4),C.alpha(C.teal,.4),C.alpha(C.teal,.4),C.alpha(C.teal,.7),C.alpha(C.teal,.4)],
+          borderColor:[C.amber,C.teal,C.amber,C.teal,C.teal,C.tealD,C.teal],
+          borderWidth:2, borderRadius:6
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:(ctx)=>{
+          const n=['老旧小区改造指导意见','城市更新行动启动','双碳节能改造加速','抗震管理条例修订','新开工2.71万个小区','十四五收官+十五五预期','节能改造持续扩面'];
+          return n[ctx.dataIndex];
+        }}}},
+        scales:{y:{max:100,grid:{color:getGridColor()},ticks:{color:getTextColor()}},x:{grid:{display:false},ticks:{color:getTextColor()}}}
+      }
+    });
+  }
+
+  if(pageId === 'segments') {
+    mk('c-segments', {
+      type:'bar',
+      data:{
+        labels:['住宅修缮\n翻新','老旧小区\n基础设施','公共建筑\n改造','防水修缮','外墙涂装\n修缮','建筑节能\n改造','抗震加固\n结构','历史建筑\n保护'],
+        datasets:[{
+          label:'规模（亿元）',
+          data:[6000,3000,2800,1750,800,500,400,200],
+          backgroundColor:[C.alpha(C.teal,.55),C.alpha(C.teal,.45),C.alpha(C.amber,.45),C.alpha(C.teal,.65),C.alpha(C.amber,.35),C.alpha(C.red,.55),C.alpha(C.blue,.35),C.alpha(C.gray,.35)],
+          borderColor:[C.tealD,C.teal,C.amber,C.tealD,C.amber,C.red,C.blue,C.gray],
+          borderWidth:2, borderRadius:6
+        }]
+      },
+      options:{...baseOpts(),scales:{...baseOpts().scales,x:{...baseOpts().scales.x,ticks:{color:getTextColor(),font:{size:9}}}}}
+    });
+    mk('c-cagr', {
+      type:'bar',
+      data:{
+        labels:['建筑节能\n改造','防水修缮','老旧小区\n改造','历史建筑\n保护','公共建筑\n改造','外墙涂装\n修缮','住宅修缮\n翻新','抗震加固'],
+        datasets:[{
+          label:'CAGR(%)',
+          data:[22,13.5,13.5,12.5,11,11,9,10],
+          backgroundColor:(ctx)=> { const v=ctx.raw||0; return v>15?C.alpha(C.red,.55):v>12?C.alpha(C.teal,.55):C.alpha(C.amber,.45); },
+          borderColor:(ctx)=>{ const v=ctx.raw||0; return v>15?C.red:v>12?C.tealD:C.amber; },
+          borderWidth:2, borderRadius:6
+        }]
+      },
+      options:{...baseOpts(),scales:{y:{grid:{color:getGridColor()},ticks:{color:getTextColor()},title:{display:true,text:'CAGR (%)',color:getTextColor()}},x:{grid:{display:false},ticks:{color:getTextColor(),font:{size:9}}}}}
+    });
+    mk('c-region', {
+      type:'doughnut',
+      data:{
+        labels:['长三角','珠三角','京津冀','成渝','中部地区','西部及其他'],
+        datasets:[{
+          data:[27,17,11,9,16,20],
+          backgroundColor:[C.alpha(C.teal,.85),C.alpha(C.amber,.85),C.alpha(C.blue,.85),C.alpha(C.red,.85),C.alpha(C.teal,.55),C.alpha(C.gray,.65)],
+          borderWidth:0
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11},color:getTextColor()}}}}
+    });
+  }
+
+  if(pageId === 'competition') {
+    mk('c-players', {
+      type:'pie',
+      data:{
+        labels:['区域性小型修缮企业','材料商施工延伸','防水修缮专业龙头','央企/国企总包','物业/装修公司'],
+        datasets:[{
+          data:[55,18,12,10,5],
+          backgroundColor:[C.alpha(C.gray,.7),C.alpha(C.amber,.85),C.alpha(C.teal,.85),C.alpha(C.blue,.85),C.alpha(C.red,.55)],
+          borderWidth:0
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11},color:getTextColor()}}}}
+    });
+    mk('c-leaders', {
+      type:'bar',
+      data:{
+        labels:['中建系旧改E','东方雨虹\n修缮业务','三棵树\n修缮板块','科顺股份\n修缮业务','北新建材\n修缮收入'],
+        datasets:[{
+          label:'修缮相关收入（亿元，2023）',
+          data:[80,50,20,18,12],
+          backgroundColor:[C.alpha(C.blue,.45),C.alpha(C.teal,.85),C.alpha(C.amber,.55),C.alpha(C.teal,.55),C.alpha(C.amber,.45)],
+          borderColor:[C.blue,C.tealD,C.amber,C.teal,C.amber],
+          borderWidth:2, borderRadius:6
+        }]
+      },
+      options:{...baseOpts(),plugins:{legend:{display:false}},scales:{y:{grid:{color:getGridColor()},ticks:{color:getTextColor()}},x:{grid:{display:false},ticks:{color:getTextColor(),font:{size:10}}}}}
+    });
+  }
+
+  if(pageId === 'forecast') {
+    mk('c-forecast', {
+      type:'line',
+      data:{
+        labels:['2024','2025','2026','2027','2028','2029','2030'],
+        datasets:[
+          { label:'乐观情景', data:[2.9,3.8,4.6,5.5,6.8,8.5,10.5], borderColor:C.teal, backgroundColor:'transparent', borderDash:[6,3], tension:0.4, pointRadius:4 },
+          { label:'基准情景', data:[2.9,3.35,3.9,4.75,5.8,7.0,9.0], borderColor:C.amber, backgroundColor:C.alpha(C.amber,.15), fill:true, tension:0.4, pointRadius:5, borderWidth:2.5 },
+          { label:'悲观情景', data:[2.9,3.0,3.4,4.0,4.7,5.3,6.0], borderColor:C.red, backgroundColor:'transparent', borderDash:[6,3], tension:0.4, pointRadius:4 }
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{boxWidth:16,font:{size:12},color:getTextColor()}}},
+        scales:{
+          y:{grid:{color:getGridColor()},ticks:{color:getTextColor()},title:{display:true,text:'广义市场规模（万亿元）',color:getTextColor()}},
+          x:{grid:{display:false},ticks:{color:getTextColor()}}
+        }
+      }
+    });
+  }
+
+  if(pageId === 'decision') {
+    mk('c-bubble', {
+      type:'bubble',
+      data:{
+        datasets:[
+          { label:'建筑节能改造', data:[{x:22,y:4,r:18}], backgroundColor:C.alpha(C.red,.55), borderColor:C.red },
+          { label:'老旧小区改造', data:[{x:13.5,y:3,r:30}], backgroundColor:C.alpha(C.teal,.55), borderColor:C.tealD },
+          { label:'专业防水修缮', data:[{x:13.5,y:2.5,r:22}], backgroundColor:C.alpha(C.teal,.4), borderColor:C.teal },
+          { label:'公共建筑改造', data:[{x:11,y:3,r:24}], backgroundColor:C.alpha(C.amber,.55), borderColor:C.amber },
+          { label:'住宅修缮翻新', data:[{x:9,y:1.5,r:40}], backgroundColor:C.alpha(C.blue,.4), borderColor:C.blue },
+          { label:'外墙涂装修缮', data:[{x:11,y:2,r:16}], backgroundColor:C.alpha(C.amber,.3), borderColor:C.amber },
+          { label:'历史建筑保护', data:[{x:12.5,y:5,r:10}], backgroundColor:C.alpha(C.gray,.55), borderColor:C.gray },
+          { label:'抗震加固', data:[{x:10,y:5,r:12}], backgroundColor:C.alpha(C.gray,.4), borderColor:C.gray }
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{position:'bottom',labels:{boxWidth:12,font:{size:10},color:getTextColor()}},
+          tooltip:{callbacks:{label:(ctx)=>`${ctx.dataset.label}: 增速${ctx.parsed.x}% | 准入难度${ctx.parsed.y}/5`}}
+        },
+        scales:{
+          x:{title:{display:true,text:'增速 CAGR (%)',color:getTextColor()},min:5,max:28,grid:{color:getGridColor()},ticks:{color:getTextColor()}},
+          y:{title:{display:true,text:'准入难度（1=低，5=高）',color:getTextColor()},min:0,max:6,grid:{color:getGridColor()},ticks:{color:getTextColor()}}
+        }
+      }
+    });
+  }
+}
+
+/* ─── INIT ─── */
+initChartsFor('overview');
+</script>
+</body>
+</html>
