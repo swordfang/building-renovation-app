@@ -140,7 +140,7 @@ body {
 }
 .nav-item.active::before { opacity: .08; }
 .nav-item .nav-icon { font-size: 16px; flex-shrink: 0; position: relative; z-index: 1; }
-.nav-item .nav-label { position: relative; z-index: 1; }
+.nav-item .nav-label { position: relative; z-index: 1; display: inline !important; }
 .nav-badge {
   margin-left: auto;
   background: var(--teal);
@@ -633,6 +633,11 @@ body {
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
+
+/* 桌面端：强制显示 nav-label */
+@media (min-width: 1025px) {
+  .nav-label { display: inline !important; }
+}
 
 /* 中等屏幕：侧边栏收窄为迷你模式，只显示图标 */
 @media (max-width: 1024px) and (min-width: 641px) {
